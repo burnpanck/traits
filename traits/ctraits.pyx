@@ -889,14 +889,15 @@ cdef class CHasTraits:
                 else:
                     trait = prefix_trait
 
-        if (trait.flags & TRAIT_VALUE_ALLOWED != 0) and isinstance(value, TraitValue):
-            IF DEBUG_LOG:
-                print 'setattr value'
-            result = self.setattr_value(trait, name, value)
-        else:
-            IF DEBUG_LOG:
-                print 'trait setattr ', name, value
-            result = trait.setattr(trait, trait, self, name, value)
+        if trait is not None:
+            if (trait.flags & TRAIT_VALUE_ALLOWED != 0) and isinstance(value, TraitValue):
+                IF DEBUG_LOG:
+                    print 'setattr value'
+                result = self.setattr_value(trait, name, value)
+            else:
+                IF DEBUG_LOG:
+                    print 'trait setattr ', name, value
+                result = trait.setattr(trait, trait, self, name, value)
 
         if result < 0:
             raise_trait_error(trait, self, name, value)
