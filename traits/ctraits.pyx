@@ -1758,7 +1758,7 @@ cdef class cTrait:
             print 'Set default value to ', value_type, value
         if value_type is None and value is None:
             if self.internal_default_value is None:
-                return None
+                return (0, None)
             else:
                 return (self.default_value_type, self.internal_default_value)
         if value_type < 0 or value_type > 9:
