@@ -1742,6 +1742,8 @@ cdef class cTrait:
                             pass
                         else:
                             raise ValueError('The argument must be a tuple or callable.')
+                    else:
+                        raise ValueError('The argument must be a tuple or callable.')
                 elif kind == 4: # Floating point range check
                     if n ==4:
                         v1 = validate[1]
@@ -1753,23 +1755,40 @@ cdef class cTrait:
                                pass
                         else:
                             raise ValueError('The argument must be a tuple or callable.')
+                    else:
+                        raise ValueError('The argument must be a tuple or callable.')
                 elif kind == 5: # Enumerated item check:
                     if n == 2:
                         if PyTuple_CheckExact(validate[1]):
                             pass
                         else:
                             raise ValueError('The argument must be a tuple or callable.')
+                    else:
+                        raise ValueError('The argument must be a tuple or callable.')
                 elif kind == 6:  # Mapped item check
                     if  n == 2 :
                         if PyDict_Check(validate[1]):
                             pass
                         else:
                             raise ValueError('The argument must be a tuple or callable.')
+                    else:
+                        raise ValueError('The argument must be a tuple or callable.')
                 elif kind == 7: # TraitComplex item check
                     if n == 2:
                         v1 = validate[1]
                         if not isinstance(v1, tuple):
                             raise ValueError('The argument must be a tuple or callable.')
+                    else:
+                        raise ValueError('The argument must be a tuple or callable.')
+                                
+                elif kind == 9:  # TupleOf item check:
+                    if n == 2:
+                        if PyTuple_CheckExact( validate[1] ):
+                            pass
+                        else:
+                            raise ValueError('The argument must be a tuple or callable.')
+                    else:
+                        raise ValueError('The argument must be a tuple or callable.')
 
                 elif kind == 10: # Prefix map item check
                     if n == 3:
@@ -1777,6 +1796,8 @@ cdef class cTrait:
                             pass
                         else:
                             raise ValueError('The argument must be a tuple or callable.')
+                    else:
+                        raise ValueError('The argument must be a tuple or callable.')
 
                 elif kind == 11: # Coercable type check
                     if n >= 2:
