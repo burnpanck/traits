@@ -2942,6 +2942,7 @@ class HasTraits ( CHasTraits ):
             (extended_trait_pat.match( name ) is None)) or (name is None)):
             self._on_trait_change( handler, name, remove, dispatch, priority, target )
 
+            print('on_trait_change exit 1')
             return
 
         from .traits_listener \
@@ -2953,6 +2954,7 @@ class HasTraits ( CHasTraits ):
                 self.on_trait_change( handler, name_i, remove, dispatch,
                                       priority, target )
 
+            print('on_trait_change exit 2')
             return
 
         # Make sure we have a name string:
@@ -2980,6 +2982,7 @@ class HasTraits ( CHasTraits ):
                 if wrapper.equals( handler ):
                     break
             else:
+                print('wrapper is not in listeners')
                 listener = ListenerParser( name ).listener
                 lnw = ListenerNotifyWrapper( handler, self, name, listener, target )
                 listeners.append( lnw )
@@ -3734,6 +3737,8 @@ class HasTraits ( CHasTraits ):
         """
         name_pattern    = self._trait_delegate_name( name, pattern )
         target_name_len = len( name_pattern.split( ':' )[-1] )
+
+        print('_init_trait_delegate_listener ',name,kind,pattern,name_pattern)
 
         @weak_arg(self)
         def notify ( self, object, notify_name, old, new ):

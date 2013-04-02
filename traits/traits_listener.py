@@ -430,6 +430,7 @@ class ListenerItem ( ListenerBase ):
 
             # Set up the appropriate trait listeners on the object for the
             # current trait:
+            print('trait_listener.register ',self,type,new,name)
             value = getattr( self, type )( new, name, False )
 
         if len( traits ) == 1:
