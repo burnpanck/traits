@@ -12,4 +12,4 @@ script:
   - nosetests
 notifications:
   email:
-    - travis-ci@enthought.com
+    - hack@delley.net
