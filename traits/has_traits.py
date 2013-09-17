@@ -53,7 +53,7 @@ from .trait_notifiers import (ExtendedTraitChangeNotifyWrapper,
 from .trait_handlers import TraitType
 
 from .trait_base import (Missing, SequenceTypes, TraitsCache, Undefined,
-    add_article, enumerate, is_none, not_event, not_false)
+    add_article, is_none, not_event, not_false)
 
 from .trait_errors import TraitError
 
@@ -907,7 +907,7 @@ class MetaHasTraitsObject ( object ):
         # Make sure the trait prefixes are sorted longest to shortest
         # so that we can easily bind dynamic traits to the longest matching
         # prefix:
-        prefix_list.sort( lambda x, y: len( y ) - len( x ) )
+        prefix_list.sort( key = lambda x: -len(x) )
 
         # Get the list of all possible 'Instance'/'List(Instance)' handlers:
         instance_traits = _get_instance_handlers( class_dict, hastraits_bases )
@@ -1513,7 +1513,7 @@ class HasTraits ( CHasTraits ):
 
             # Resort the list from longest to shortest (if necessary):
             if changed:
-                subclass_list.sort( lambda x, y: len( y ) - len( x ) )
+                subclass_list.sort( key = lambda x: -len( x ) )
 
             # Merge the 'listeners':
             subclass_traits = getattr( subclass, ListenerTraits )
@@ -1621,7 +1621,7 @@ class HasTraits ( CHasTraits ):
             def __getstate__(self):
                 state = super(X,self).__getstate__()
                 for key in ['foo', 'bar']:
-                    if state.has_key(key):
+                    if key in state:
                         del state[key]
                 return state
         """
@@ -3788,7 +3788,7 @@ def provides( *protocols ):
 
     # Verify that each argument is a valid protocol.
     for protocol in protocols:
-        if not issubclass(protocol.__metaclass__, ABCMeta):
+        if not issubclass(type(protocol), ABCMeta):
             raise TraitError(
                 "All arguments to 'provides' must be "
                 "subclasses of Interface or be a Python ABC."
