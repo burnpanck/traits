@@ -39,11 +39,9 @@ import copy
 import copy_reg
 from types import FunctionType, MethodType
 TypeType = type
-import collections
 
 from weakref import ref
 
-from .ctraits import CTraitMethod
 from .trait_base import (strx, SequenceTypes, Undefined, TypeTypes, ClassTypes,
     CoercableTypes, TraitsCache, class_of, Missing)
 from .trait_errors import TraitError, repr_type
@@ -68,7 +66,7 @@ RICH_COMPARE            = 2
 
 RangeTypes    = ( int, long, float )
 
-CallableTypes = ( FunctionType, MethodType, CTraitMethod )
+CallableTypes = ( FunctionType, MethodType )
 
 # Mapping from trait metadata 'type' to CTrait 'type':
 trait_types = {
@@ -172,131 +170,6 @@ class BaseTraitHandler ( object ):
         """
         raise TraitError( object, name, self.full_info( object, name, value ),
                           value )
-
-    def arg_error ( self, method, arg_num, object, name, value ):
-        """ Raises a TraitError exception to notify the user that a method on
-        an instance received a positional argument of an incorrect type.
-
-        Parameters
-        ----------
-        method : function
-            The method that encountered the error.
-        arg_num : int
-            The position of the incorrect argument in the argument list.
-        object : object
-            The object whose method was called.
-        name : str
-            The name of the parameter corresponding to the incorrect argument.
-        value : object
-            The value passed to the argument.
-
-        Description
-        -----------
-        This method can be called when type-checking a method.
-        """
-        raise TraitError, ("The '%s' parameter (argument %d) of the %s method "
-                           "of %s instance must be %s, but a value of %s was "
-                           "specified." % (name, arg_num, method.tm_name,
-                           class_of(object),
-                           self.full_info(object, name, value),
-                           repr_type(value)))
-
-    def keyword_error ( self, method, object, name, value ):
-        """ Raises a TraitError exception to notify the user that a method on
-        an instance received a keyword argument of an incorrect type.
-
-        Parameters
-        ----------
-        method : function
-            The method that encountered the error.
-        object : object
-            The object whose method was called.
-        name : str
-            The name of the parameter corresponding to the incorrect argument.
-        value :
-            The value passed to the argument.
-
-        Description
-        -----------
-        This method can be called when type-checking a method.
-        """
-        raise TraitError, ("The '%s' keyword argument of the %s method of "
-                           "%s instance must be %s, but a value of %s was "
-                           "specified." % (name, method.tm_name,
-                           class_of(object), self.info(object, name, value),
-                           repr_type(value)))
-
-    def missing_arg_error ( self, method, arg_num, object, name ):
-        """ Raises a TraitError exception to notify the user that a method on
-        an instance failed to receive a required positional argument.
-
-        Parameters
-        ----------
-        method : function
-            The method that encountered the error.
-        arg_num : int
-            The position of the incorrect argument in the argument list.
-        object : object
-            The object whose method was called.
-        name : str
-            The name of the parameter corresponding to the incorrect argument.
-
-        Description
-        -----------
-        This method can be called when type-checking a method.
-        """
-        raise TraitError, ("The '%s' parameter (argument %d) of the %s method "
-                           "of %s instance must be specified, but was omitted."
-                           % ( name, arg_num, method.tm_name,
-                               class_of( object ) ) )
-
-    def dup_arg_error ( self, method, arg_num, object, name ):
-        """ Raises a TraitError exception to notify the user that a method on
-        an instance received an argument as both a keyword argument and a
-        positional argument.
-
-        Parameters
-        ----------
-        method : function
-            The method that encountered the error.
-        arg_num : int
-            The position of the incorrect argument in the argument list.
-        object : object
-            The object whose method was called.
-        name : str
-            The name of the parameter corresponding to the incorrect argument.
-
-        Description
-        -----------
-        This method can be called when type-checking a method.
-        """
-        raise TraitError, ("The '%s' parameter (argument %d) of the %s method "
-                           "of %s instance was specified as both a positional "
-                           "and keyword value."
-                           % ( name, arg_num, method.tm_name,
-                               class_of( object ) ) )
-
-    def return_error ( self, method, object, value ):
-        """ Raises a TraitError exception to notify the user that a method on
-        an instance returned a value of incorrect type.
-
-        Parameters
-        ----------
-        method : function
-            The method that encountered the error.
-        object : object
-            The object whose method was called.
-        value :
-            The value returned by the method.
-
-        Description
-        -----------
-        This method can be called when type-checking a method.
-        """
-        raise TraitError, ("The result of the %s method of %s instance must "
-                           "be %s, but a value of %s was returned." % (
-                           method.tm_name, class_of(object), self.info(),
-                           repr_type(value)))
 
     def full_info ( self, object, name, value ):
         """Returns a string describing the type of value accepted by the
@@ -1369,7 +1242,7 @@ class TraitInstance ( ThisClass ):
     TraitInstance ensures that assigned values are exactly of the type specified
     (i.e., no coercion is performed).
     """
-    def __init__ ( self, aClass, allow_none = True, adapt = 'yes',
+    def __init__ ( self, aClass, allow_none = True, adapt = 'no',
                    module = '' ):
         """Creates a TraitInstance handler.
 
@@ -2271,6 +2144,7 @@ class TraitListEvent ( object ):
             added = []
         self.added = added
 
+
 #-------------------------------------------------------------------------------
 #  'TraitList' class:
 #-------------------------------------------------------------------------------
@@ -2462,24 +2336,26 @@ class TraitListObject ( list ):
         try:
             removed = self[ key ]
         except:
-            pass
+            removed = []
         try:
             object   = self.object()
             validate = self.trait.item_trait.handler.validate
             name     = self.name
-            
-            if isinstance(key,slice):
+
+            if isinstance(key, slice):
                 values = value
-                if not isinstance(values, collections.Sequence):
-                    raise TypeError, 'must assign sequence (not "%s") to slice' % (
-                                     values.__class__.__name__ )
-                key = slice(*key.indices(len( self )))
+                try:
+                    key = slice(*key.indices(len( self )))
+                except (ValueError, TypeError):
+                    raise TypeError('must assign sequence (not "%s") to slice' % (
+                                    values.__class__.__name__ ))
                 slice_len = max(0, (key.stop - key.start) // key.step)
                 delta = len( values ) - slice_len
                 if key.step != 1 and delta != 0:
-                    raise ValueError, 'attempt to assign sequence of size %d to extended slice of size %d' % (
+                    raise ValueError(
+                        'attempt to assign sequence of size %d to extended slice of size %d' % (
                         len( values ), slice_len
-                    )
+                    ))
                 newlen = (len(self) + delta)
                 if not (self_trait.minlen <= newlen <= self_trait.maxlen):
                     self.len_error( newlen )
@@ -2489,17 +2365,28 @@ class TraitListObject ( list ):
                     values = [ validate( object, name, value )
                                for value in values ]
                 value = values
-                
-                startidx = key.start+(slice_len-1)*key.step if key.step<0 else key.start
-            else:                        
+                if key.step == 1:
+                    # FIXME: Bug-for-bug compatibility with old __setslice__ code.
+                    # In this case, we return a TraitListEvent with an
+                    # index=key.start and the removed and added lists as they
+                    # are.
+                    index = key.start
+                else:
+                    # Otherwise, we have an extended slice which was handled,
+                    # badly, by __setitem__ before. In this case, we return the
+                    # removed and added lists wrapped in another list.
+                    index = key
+                    values = [values]
+                    removed = [removed]
+            else:
                 if validate is not None:
                     value = validate( object, name, value )
 
                 values = [ value ]
                 removed = [ removed ]
                 delta = 0
-                
-                startidx = len( self ) + key if key < 0 else key
+
+                index = len( self ) + key if key < 0 else key
 
             list.__setitem__( self, key, value )
             if self.name_items is not None:
@@ -2511,7 +2398,7 @@ class TraitListObject ( list ):
                         # Treat incomparable values as equal:
                         pass
                 self._send_trait_items_event( self.name_items,
-                    TraitListEvent( startidx, removed, values ) )
+                    TraitListEvent( index, removed, values ) )
 
         except TraitError, excp:
             excp.set_prefix( 'Each element of the' )
@@ -2519,28 +2406,34 @@ class TraitListObject ( list ):
 
     if sys.version_info[0] < 3:
         def __setslice__ ( self, i, j, values ):
-            self.__setitem__(slice(i,j),values)
-        
+            self.__setitem__(slice(i,j), values)
+
     def __delitem__ ( self, key ):
         trait = getattr(self, 'trait', None)
         if trait is None:
             return list.__delitem__(self, key)
-            
+
         try:
             removed = self[ key ]
         except:
-            pass
+            removed = []
 
         if isinstance(key,slice):
             key = slice(*key.indices(len( self )))
             slice_len = max(0, (key.stop - key.start) // key.step)
             delta = slice_len
-            startidx = key.start+(slice_len-1)*key.step if key.step<0 else key.start
+            if key.step == 1:
+                # FIXME: See corresponding comment in __setitem__() for
+                # explanation.
+                index = key.start
+            else:
+                index = key
+                removed = [removed]
         else:
             delta = 1
-            startidx = len( self ) + key + 1 if key < 0 else key
+            index = len( self ) + key + 1 if key < 0 else key
             removed = [ removed ]
-            
+
         if not (trait.minlen <= (len( self ) - delta)):
             self.len_error( len( self ) - delta)
             return
@@ -2549,12 +2442,38 @@ class TraitListObject ( list ):
 
         if self.name_items is not None:
             self._send_trait_items_event( self.name_items,
-                TraitListEvent( startidx, removed ) )
+                TraitListEvent( index, removed ) )
 
     if sys.version_info[0] < 3:
         def __delslice__ ( self, i, j ):
             self.__delitem__(slice(i,j))
 
+    def __iadd__(self, other):
+        self.extend(other)
+        return self
+
+    def __imul__(self, count):
+        trait = getattr( self, 'trait', None )
+        if trait is None:
+            return list.__imul__( self, count )
+
+        original_len = len( self )
+
+        if trait.minlen <= original_len * count <= trait.maxlen:
+            if self.name_items is not None:
+                removed = None if count else self[:]
+
+            result = list.__imul__(self, count)
+
+            if self.name_items is not None:
+                added = self[original_len:] if count else None
+                index = original_len if count else 0
+                self._send_trait_items_event( self.name_items,
+                    TraitListEvent( index, removed, added ) )
+
+            return result
+        else:
+            self.len_error( original_len * count )
 
 
     def append ( self, value ):
@@ -2596,8 +2515,18 @@ class TraitListObject ( list ):
                 list.insert( self, index, value )
 
                 if self.name_items is not None:
+                    # Length before the insertion.
+                    original_len = len( self ) - 1
+
+                    # Indices outside [-original_len, original_len] are clipped.
+                    # This matches the behaviour of insert on the
+                    # underlying list.
                     if index < 0:
-                        index = len( self ) + index - 1
+                        index += original_len
+                        if index < 0:
+                            index = 0
+                    elif index > original_len:
+                        index = original_len
 
                     self._send_trait_items_event( self.name_items,
                         TraitListEvent( index, None, [ value ] ),
@@ -2670,10 +2599,18 @@ class TraitListObject ( list ):
         else:
             self.len_error( len( self ) - 1 )
 
-    def sort ( self, cmp = None, key = None, reverse = False ):
-        removed = self[:]
-        list.sort( self, cmp = cmp, key = key, reverse = reverse )
+    if sys.version_info[0] < 3:
+        def sort ( self, cmp = None, key = None, reverse = False ):
+            removed = self[:]
+            list.sort( self, cmp = cmp, key = key, reverse = reverse )
+            self._sort_common(removed)
+    else:
+        def sort ( self, key = None, reverse = False ):
+            removed = self[:]
+            list.sort( self, key = key, reverse = reverse )
+            self._sort_common(removed)
 
+    def _sort_common ( self, removed ):
         if (getattr(self, 'name_items', None) is not None and
             getattr(self, 'trait', None) is not None):
             self._send_trait_items_event( self.name_items,

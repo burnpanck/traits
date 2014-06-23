@@ -8,6 +8,10 @@ http://github.enthought.com/traits
    :target: https://travis-ci.org/enthought/traits
    :alt: Build status
 
+.. image:: https://coveralls.io/repos/enthought/traits/badge.png
+   :target: https://coveralls.io/r/enthought/traits
+   :alt: Coverage status
+
 The Traits project is at the center of all Enthought Tool Suite development
 and has changed the mental model used at Enthought for programming in the
 already extremely efficient Python programming language. We encourage everyone
@@ -46,5 +50,5 @@ Dependencies
 
 Traits has the following optional dependencies:
 
-* `Numpy <http://pypi.python.org/pypi/numpy>`_ to support the trait types
+* `NumPy <http://pypi.python.org/pypi/numpy>`_ to support the trait types
   for arrays.
