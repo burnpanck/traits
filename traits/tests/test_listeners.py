@@ -223,7 +223,8 @@ class UnhashableHasTraits(HasTraits):
         
 
 class Container(HasTraits):
-    sub = Instance(UnhashableHasTraits)
+    sub = Any
+
 
 class TestUnhashableHasTraits(unittest.TestCase):
     def setUp(self):
@@ -249,13 +250,39 @@ class TestUnhashableHasTraits(unittest.TestCase):
         obj.on_trait_change(obj_a_changed,'a')
         obj.a = 3
         self.assertSequenceEqual(events,[3])
+
+    def test_normal_link(self):
+        obj = Container(sub = A())
+        events = []
+        def obj_sub_changed(new):
+            events.append(new)
+        obj.on_trait_change(obj_sub_changed,'sub')
+        obj.sub = A()
+        self.assertSequenceEqual(events,[obj.sub])
+
+
+    def test_unhashable_instance(self):
+        obj = Container()
+        events = []
+        def obj_sub_changed(new):
+            events.append(new)
+        obj.on_trait_change(obj_sub_changed,'sub')
+        obj.sub = UnhashableHasTraits()
+        self.assertSequenceEqual(events,[obj.sub])
+
+    def test_unhashable_instance2(self):
+        obj = Container(sub = UnhashableHasTraits())
+        events = []
+        def obj_sub_changed(new):
+            events.append(new)
+        obj.on_trait_change(obj_sub_changed,'sub')
+        obj.sub = UnhashableHasTraits()
+        self.assertSequenceEqual(events,[obj.sub])
     
-    def test_unshashable_intermediate(self):
+    def test_unshashable_link(self):
         obj = Container(sub = UnhashableHasTraits(a=1))
         events = []
         def obj_sub_a_changed(new):
-            events.append(new)
-        def obj_sub_a2_changed(new):
             events.append(new)
         obj.on_trait_change(obj_sub_a_changed,'sub.a')
         obj.sub.a = 2
@@ -264,6 +291,7 @@ class TestUnhashableHasTraits(unittest.TestCase):
         obj.sub = UnhashableHasTraits(a=3)
         obj.sub.a = 4
         self.assertSequenceEqual(events,[2,3,4])
+
 
 # Run the unit tests (if invoked from the command line):
 if __name__ == '__main__':
