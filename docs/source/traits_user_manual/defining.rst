@@ -245,6 +245,15 @@ trait cannot be used as a simple name, it is omitted from the Name column of
 the table.
 
 .. index:: Any(), Array(), Button(), Callable(), CArray(), Class(), Code()
+.. index:: Color(), CSet(), Constant(), Dict()
+.. index:: Directory(), Disallow, Either(), Enum()
+.. index:: Event(), Expression(), false, File(), Font()
+.. index:: Instance(), List(), Method(), Module()
+.. index:: Password(), Property(), Python()
+.. index:: PythonValue(), Range(), ReadOnly(), Regex()
+.. index:: RGBColor(), Set() String(), This,
+.. index:: ToolbarButton(), true, Tuple(), Type()
+.. index:: undefined, UUID(), ValidatedTuple(), WeakRef()
 
 .. _predefined-traits-beyond-simple-types-table:
 
@@ -257,6 +266,9 @@ the table.
 +------------------+----------------------------------------------------------+
 | Array            | Array( [*dtype* = None, *shape* = None, *value* = None,  |
 |                  | *typecode* = None, \*\*\ *metadata*] )                   |
++------------------+----------------------------------------------------------+
+| ArrayOrNone      | ArrayOrNone( [*dtype* = None, *shape* = None,            |
+|                  | *value* = None, *typecode* = None, \*\*\ *metadata*] )   |
 +------------------+----------------------------------------------------------+
 | Button           | Button( [*label* = '', *image* = None, *style* =         |
 |                  | 'button', *orientation* = 'vertical', *width_padding* =  |
@@ -274,17 +286,17 @@ the table.
 +------------------+----------------------------------------------------------+
 | Color            | Color( [\*\ *args*, \*\*\ *metadata*] )                  |
 +------------------+----------------------------------------------------------+
-| CSet             |CSet( [*trait* = None, *value* = None, *items* = True,    |
-|                  |\*\*\ *metadata*] )                                       |
+| CSet             | CSet( [*trait* = None, *value* = None, *items* = True,   |
+|                  | \*\*\ *metadata*] )                                      |
 +------------------+----------------------------------------------------------+
 | n/a              | Constant( *value*[, \*\*\ *metadata*] )                  |
 +------------------+----------------------------------------------------------+
-| Dict, DictStrAny,|Dict( [*key_trait* = None, *value_trait* = None,          |
-| DictStrBool,     |*value* = None, *items* = True, \*\*\ *metadata*] )       |
+| Dict, DictStrAny,| Dict( [*key_trait* = None, *value_trait* = None,         |
+| DictStrBool,     | *value* = None, *items* = True, \*\*\ *metadata*] )      |
 | DictStrFloat,    |                                                          |
-| DictStrInt,      |.. index:: Color(), CSet(), Constant(), Dict()            |
-| DictStrList,     |.. index:: Directory(), Disallow, Either(), Enum()        |
-| DictStrLong,     |.. index:: Event(), Expression(), false, File(), Font()   |
+| DictStrInt,      |                                                          |
+| DictStrList,     |                                                          |
+| DictStrLong,     |                                                          |
 | DictStrStr       |                                                          |
 +------------------+----------------------------------------------------------+
 | Directory        | Directory( [*value* = '', *auto_set* = False, *entries* =|
@@ -292,7 +304,7 @@ the table.
 +------------------+----------------------------------------------------------+
 | Disallow         | n/a                                                      |
 +------------------+----------------------------------------------------------+
-| n/a              |Either( *val1*[, *val2*, ..., *valN*, \*\*\ *metadata*] ) |
+| n/a              | Either( *val1*[, *val2*, ..., *valN*, \*\*\ *metadata*] )|
 +------------------+----------------------------------------------------------+
 | Enum             | Enum( *values*[, \*\*\ *metadata*] )                     |
 +------------------+----------------------------------------------------------+
@@ -320,15 +332,15 @@ the table.
 |                  | None, *kw* = None, *allow_none* = True, *adapt* = None,  |
 |                  | *module* = None, \*\*\ *metadata*] )                     |
 +------------------+----------------------------------------------------------+
-| List, ListBool,  |List([*trait* = None, *value* = None, *minlen* = 0,       |
-| ListClass,       |*maxlen* = sys.maxint, *items* = True, \*\*\ *metadata*]) |
+| List, ListBool,  | List([*trait* = None, *value* = None, *minlen* = 0,      |
+| ListClass,       | *maxlen* = sys.maxint, *items* = True, \*\*\ *metadata*])|
 | ListComplex,     |                                                          |
-| ListFloat,       |.. index:: Function(), Generic(), generic_trait, HTML()   |
-| ListFunction,    |.. index:: Instance(), List(), Method(), Module()         |
-| ListInstance,    |.. index:: Password(), Property(), Python(), PythonValue()|
-| ListInt,         |.. index:: Range(), ReadOnly(), Regex(), RGBColor(), Set()|
-| ListMethod,      |.. index:: String(), This, ToolbarButton(), true, Tuple() |
-| ListStr,         |.. index:: Type(), undefined, UUID(), WeakRef()           |
+| ListFloat,       |                                                          |
+| ListFunction,    |                                                          |
+| ListInstance,    |                                                          |
+| ListInt,         |                                                          |
+| ListMethod,      |                                                          |
+| ListStr,         |                                                          |
 | ListThis,        |                                                          |
 | ListUnicode      |                                                          |
 +------------------+----------------------------------------------------------+
@@ -386,6 +398,9 @@ the table.
 |                  | NoDefaultSpecified, \*\*\ *metadata*])                   |
 +------------------+----------------------------------------------------------+
 | UUID [3]_        | UUID( [\*\*\ *metadata*] )                               |
++------------------+----------------------------------------------------------+
+| ValidatedTuple   | ValidatedTuple( [\*\ *traits*, *fvalidate* = None,       |
+|                  | *fvalidate_info* = '' , \*\*\ *metadata*] )              |
 +------------------+----------------------------------------------------------+
 | WeakRef          | WeakRef( [*klass* = 'traits.HasTraits',                  |
 |                  | *allow_none* = False, *adapt* = 'yes', \*\*\ *metadata*])|
@@ -583,7 +598,10 @@ HasTraits objects:
 * **desc**: A string describing the intended meaning of the trait. It is used
   in exception messages and fly-over help in user interface trait editors.
 * **editor**: Specifies an instance of a subclass of TraitEditor to use when
-  creating a user interface editor for the trait. Refer to the `TraitsUI User Manual <http://github.enthought.com/traitsui/index.html>`_ for more information on trait editors.
+  creating a user interface editor for the trait. Refer to the
+  `TraitsUI User Manual
+  <http://docs.enthought.com/traitsui/traitsui_user_manual/index.html>`_
+  for more information on trait editors.
 * **label**: A string providing a human-readable name for the trait. It is
   used to label trait attribute values in user interface trait editors.
 * **rich_compare**: A Boolean indicating whether the basis for considering a
@@ -690,4 +708,3 @@ the metadata attribute::
        details on particular traits, and see Chapter 5 for details on extending
        existing traits.
 .. [3] Available in Python 2.5.
-
