@@ -47,6 +47,14 @@ class DelegateMess(HasTraits):
             getattr(self, '_init_trait_%s_listener' % data[0])(name, *data)
 
 
+class DelegateLeak(HasTraits):
+    visible = Property(Bool, depends_on='can_enable')
+
+    can_enable = DelegatesTo('flag', prefix='x')
+
+    flag = Instance(Dummy, kw={'x': 42})
+
+
 class Presenter(HasTraits):
     obj = Instance(Dummy)
     y = Property(Int(), depends_on='obj.x')
@@ -126,6 +134,45 @@ class TestRegression(unittest.TestCase):
         list_test.b = [1, 2, 3]
         list_test.b[0] = 0
         self.assertEqual(list_test.events_received, 3)
+
+    def test_has_traits_notifiers_refleak(self):
+        # Regression test for issue described in
+        # https://github.com/enthought/traits/pull/248
+        def handler():
+            pass
+
+        def f():
+            obj = HasTraits()
+            obj.on_trait_change(handler)
+
+        # Warmup.
+        for _ in xrange(10):
+            f()
+            gc.collect()
+
+        refs = len(gc.get_objects())
+        f()
+        gc.collect()
+        refs2 = len(gc.get_objects())
+        self.assertEqual(refs, refs2)
+
+    def test_delegation_refleak(self):
+        warmup_cycles = 5
+        cycles = 5
+        counts = []
+
+        for _ in xrange(warmup_cycles):
+            DelegateLeak()
+            gc.collect()
+
+        for _ in xrange(cycles):
+            DelegateLeak()
+            gc.collect()
+            counts.append(len(gc.get_objects()))
+
+        # All the counts should be the same.
+        for old_count, new_count in zip(counts[:-1], counts[1:]):
+            self.assertEqual(old_count, new_count)
 
 
 if __name__ == '__main__':
